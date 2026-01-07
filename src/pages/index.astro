@@ -1,0 +1,188 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+// Assure-toi que cette image existe bien dans src/assets/
+import leafImg from '../assets/leaf2.png'; 
+
+/* --- DATA: RECENT ACTIVITY --- */
+const activities = [
+    { date: "Jan 2026", event: "Paper submitted (MLLM, gaze estimation)" },
+    { date: "Dec 2025", event: "Code release: k-flow" },
+    { date: "Nov 2025", event: "Talk @ Inria seminar (ComLearn)" },
+    { date: "Oct 2025", event: "Started PhD @ Inria Grenoble" },
+];
+---
+
+<BaseLayout title="Maxime Attwood | Research Portfolio">
+    
+    <div class="deco-container">
+        <Image src={leafImg} alt="" class="leaf leaf-top" />
+        <Image src={leafImg} alt="" class="leaf leaf-bottom" />
+    </div>
+
+    <section id="about" style="margin-top: 40px; position: relative; z-index: 1;">
+        <h2
+            style="
+                font-family: 'Playfair Display', serif;
+                font-size: 2rem;
+                margin-bottom: 20px;
+                font-style: italic;
+            "
+        >
+            About
+        </h2>
+
+        <p
+            style="
+                font-size: 1.4rem;
+                max-width: 780px;
+                color: var(--text-ink);
+                line-height: 1.6;
+            "
+        >
+            I am a PhD Student at Inria Grenoble, within the ComLearn team
+            (formerly RobotLearn), where I study multimodal artificial intelligence
+            for natural and low-latency interaction.
+            <br /><br />
+            My research focuses on the design of efficient learning architectures
+            that integrate vision, language, and audio to model social cues and
+            support fluid human–machine dialogue.
+            <br /><br />
+            Beyond applied machine learning, I maintain a strong interest in more
+            theoretical mathematics as a personal practice.
+        </p>
+
+        <p
+            style="
+                margin-top: 28px;
+                font-size: 1.1rem;
+                max-width: 780px;
+                color: var(--text-muted);
+                line-height: 1.5;
+            "
+        >
+            Current research interests include generative AI, world models,
+            and the intersection of neuroscience-inspired principles with
+            social machine learning.
+            
+            <br /><br />
+            <span style="color: var(--text-ink); font-style: italic;">
+                I’m always happy to discuss research, collaborate, or exchange ideas.
+            </span>
+        </p>
+
+        <div class="activity-container">
+            <h3 class="activity-title">Recent Activity</h3>
+            <ul class="activity-list">
+                {activities.map(item => (
+                    <li>
+                        <span class="act-date">{item.date}</span>
+                        <span class="act-sep">·</span>
+                        <span class="act-event">{item.event}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+        <div style="margin-top: 60px;">
+            <a
+                href="/work"
+                style="
+                    color: var(--accent-sage);
+                    text-decoration: none;
+                    border-bottom: 1px solid var(--accent-sage);
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    font-size: 0.8rem;
+                "
+            >
+                See my Work →
+            </a>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    /* --- STYLE DES FEUILLES (DÉCO) --- */
+    .deco-container {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%;
+        pointer-events: none; /* Important : permet de cliquer à travers */
+        z-index: 0; /* Reste en arrière-plan */
+        overflow: hidden;
+    }
+
+    .leaf { 
+        position: absolute; 
+        opacity: 0.3; /* Transparence ajustable */
+        mix-blend-mode: multiply; /* Fusionne avec le fond beige */
+    }
+
+    .leaf-top { 
+        top: -50px; 
+        right: -160px; 
+        width: 1200px; 
+        height: auto; 
+        transform: rotate(45deg); 
+    }
+
+    .leaf-bottom { 
+        bottom: -20px; 
+        left: -80px; 
+        width: 900px; 
+        height: auto; 
+        transform: rotate(-30deg); 
+        filter: blur(2px); /* Effet de profondeur de champ */
+    }
+
+    /* --- STYLE RECENT ACTIVITY --- */
+    .activity-container {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--deco-almond);
+        max-width: 650px;
+    }
+
+    .activity-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-style: italic;
+        margin: 0 0 15px 0;
+        color: var(--text-ink);
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: "Lato", sans-serif;
+        font-size: 0.95rem;
+    }
+
+    .activity-list li {
+        display: flex;
+        margin-bottom: 8px;
+        align-items: baseline;
+    }
+
+    .act-date {
+        color: var(--accent-sage);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 85px; /* Largeur fixe pour aligner la colonne */
+        flex-shrink: 0;
+    }
+
+    .act-sep {
+        margin: 0 10px;
+        color: var(--deco-almond);
+    }
+
+    .act-event {
+        color: var(--text-ink);
+    }
+</style>

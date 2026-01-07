@@ -1,0 +1,365 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+// 1. On importe le composant Image pour l'optimisation
+import { Image } from 'astro:assets';
+
+const allJournal = await getCollection('journal');
+---
+
+<BaseLayout title="Journal | Le Salon" active="journal">
+    <section>
+        <div style="margin-bottom: 60px; text-align: center;">
+             <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; color: var(--text-ink);">Infusion Notes</h2>
+             <p style="font-size: 0.9rem; color: var(--text-muted);">A modest collection of tastes, noted over time.</p>
+        </div>
+
+        <div class="tea-grid">
+            {allJournal.map((entry) => (
+                <button 
+                    class="tea-card"
+                    style={`background-color: ${entry.data.color};`}
+                    /* On stocke toutes les données dans le bouton pour que le JS les lise */
+                    data-title={entry.data.title}
+                    data-type={entry.data.type}
+                    /* 2. IMPORTANT : On passe .src pour récupérer le chemin de l'image optimisée */
+                    data-image={entry.data.image.src}
+                    data-color={entry.data.color}
+                    data-origin={entry.data.origin}
+                    data-cultivar={entry.data.cultivar}
+                    data-vendor={entry.data.vendor}
+                    data-harvest={entry.data.harvest}
+                    data-desc={entry.body}
+                    data-pairing={entry.data.pairing}
+                >
+                    <div class="card-img-container">
+                        <Image src={entry.data.image} alt={entry.data.title} />
+                    </div>
+                    
+                    <div class="card-info">
+                        <span class="card-type">{entry.data.type}</span>
+                        <h3 class="card-title">{entry.data.title}</h3>
+                    </div>
+                </button>
+            ))}
+        </div>
+    </section>
+
+    <div id="tea-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <button id="close-modal" class="close-icon">&times;</button>
+            
+            <div class="modal-layout">
+                <div class="modal-image-col">
+                    <img id="m-image" src="" alt="" />
+                </div>
+
+                <div class="modal-text-col" id="m-bg-target">
+                    <span id="m-type" class="modal-subtitle">Type</span>
+                    <h2 id="m-title" class="modal-title">Titre</h2>
+                    
+                    <div class="modal-meta-grid">
+                        <div class="meta-item">
+                            <span class="label">Origine</span>
+                            <span id="m-origin" class="value">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="label">Cultivar</span>
+                            <span id="m-cultivar" class="value">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="label">Vendor</span>
+                            <span id="m-vendor" class="value">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="label">Récolte</span>
+                            <span id="m-harvest" class="value">-</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-divider"></div>
+
+                    <p id="m-desc" class="modal-desc">Description...</p>
+
+                    <div class="modal-pairing">
+                        <strong>Pairing Code:</strong> <span id="m-pairing"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<script>
+    // Logique JavaScript pour ouvrir/fermer et remplir le modal
+    const modal = document.getElementById('tea-modal');
+    const closeBtn = document.getElementById('close-modal');
+    const cards = document.querySelectorAll('.tea-card');
+
+    // Éléments du modal à remplir
+    const mTitle = document.getElementById('m-title');
+    const mType = document.getElementById('m-type');
+    const mImage = document.getElementById('m-image');
+    const mOrigin = document.getElementById('m-origin');
+    const mCultivar = document.getElementById('m-cultivar');
+    const mVendor = document.getElementById('m-vendor');
+    const mHarvest = document.getElementById('m-harvest');
+    const mDesc = document.getElementById('m-desc');
+    const mPairing = document.getElementById('m-pairing');
+    const mBgTarget = document.getElementById('m-bg-target'); // Pour changer la couleur de fond du panneau droit
+
+    // Ouvrir
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Remplissage des données
+            // @ts-ignore
+            mTitle.innerText = card.dataset.title;
+            // @ts-ignore
+            mType.innerText = card.dataset.type;
+            // @ts-ignore
+            mImage.src = card.dataset.image;
+            // @ts-ignore
+            mOrigin.innerText = card.dataset.origin || "—";
+            // @ts-ignore
+            mCultivar.innerText = card.dataset.cultivar || "—";
+            // @ts-ignore
+            mVendor.innerText = card.dataset.vendor || "—";
+            // @ts-ignore
+            mHarvest.innerText = card.dataset.harvest || "—";
+            // @ts-ignore
+            mDesc.innerText = card.dataset.desc;
+            // @ts-ignore
+            mPairing.innerText = card.dataset.pairing || "—";
+
+            // Appliquer la couleur du thé au fond du panneau droit (optionnel, effet stylé)
+            // @ts-ignore
+            if(mBgTarget) mBgTarget.style.backgroundColor = card.dataset.color;
+            // @ts-ignore
+            if(mBgTarget) mBgTarget.style.color = "#fff"; // Texte blanc pour contraste sur couleur
+
+            modal.classList.add('open');
+        });
+    });
+
+    // Fermer
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('open');
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+    });
+</script>
+
+<style>
+    /* --- GRILLE --- */
+    .tea-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .tea-card {
+        aspect-ratio: 1 / 1.2; /* Format portrait court */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: left;
+        color: white; /* Texte blanc par défaut sur les cartes colorées */
+        position: relative;
+    }
+
+    .tea-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .card-img-container {
+        height: 65%;
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    /* On cible l'image générée par Astro */
+    .card-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.5s;
+        filter: brightness(0.9); /* Légèrement sombre pour faire ressortir le texte */
+    }
+
+    .tea-card:hover .card-img-container img {
+        transform: scale(1.05); /* Zoom subtil au survol */
+    }
+
+    .card-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(to top, rgba(0,0,0,0.2), transparent); /* Ombre légère texte */
+    }
+
+    .card-type {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    /* --- MODAL --- */
+    .modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-backdrop.open { display: flex; animation: fadeIn 0.3s ease; }
+
+    .modal-content {
+        background-color: var(--bg-paper);
+        width: 90%;
+        max-width: 900px;
+        max-height: 90vh;
+        border-radius: 4px;
+        overflow: hidden; /* Pour gérer le scroll interne si besoin */
+        position: relative;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr; /* Image à gauche, Texte à droite */
+        height: 600px; /* Hauteur fixe pour le style "grande carte" */
+    }
+
+    .modal-image-col {
+        background-color: #ddd;
+    }
+    .modal-image-col img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .modal-text-col {
+        padding: 50px;
+        overflow-y: auto; /* Scroll si le texte est très long */
+        /* La couleur de fond sera définie par le JS */
+        color: #fff; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .close-icon {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: white; /* Blanc car souvent sur fond coloré */
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 10;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .close-icon:hover { opacity: 0.7; }
+
+    /* Typo Modal */
+    .modal-subtitle {
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 0.8rem;
+        opacity: 0.8;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .modal-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        margin: 0 0 30px 0;
+        line-height: 1.1;
+    }
+
+    .modal-meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        font-size: 0.9rem;
+        margin-bottom: 30px;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .meta-item .label {
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        letter-spacing: 1px;
+        opacity: 0.6;
+        margin-bottom: 3px;
+    }
+
+    .meta-item .value {
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        font-size: 1.1rem;
+    }
+
+    .modal-divider {
+        height: 1px;
+        background-color: rgba(255,255,255,0.3);
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    .modal-desc {
+        font-size: 1rem;
+        line-height: 1.8;
+        opacity: 0.95;
+        margin-bottom: 30px;
+        white-space: pre-line; /* Conserve les sauts de ligne du Markdown */
+    }
+
+    .modal-pairing {
+        font-size: 0.85rem;
+        background-color: rgba(0,0,0,0.1);
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 3px solid rgba(255,255,255,0.5);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    /* Mobile */
+    @media (max-width: 800px) {
+        .modal-layout { grid-template-columns: 1fr; height: auto; }
+        .modal-image-col { height: 250px; }
+        .modal-text-col { padding: 30px; }
+        .close-icon { color: #333; /* Sur mobile l'image est en haut, bouton probablement sur l'image ou fond blanc si scroll */ text-shadow: 0 0 5px white; }
+    }
+</style>

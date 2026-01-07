@@ -1,0 +1,120 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+
+// 1. Génère les chemins pour tous les projets existants
+export async function getStaticPaths() {
+  const works = await getCollection('work');
+  return works.map(entry => ({
+    params: { slug: entry.slug }, props: { entry },
+  }));
+}
+
+// 2. Récupère les données du projet actuel
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+// 3. Vérification de la catégorie pour le style de l'image
+const isPaper = entry.data.category === 'paper';
+---
+
+<BaseLayout title={`${entry.data.title} | Portfolio`}>
+    
+    <header style="margin-bottom: 60px; border-bottom: 1px solid var(--deco-almond); padding-bottom: 40px;">
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-sage); margin-bottom: 10px;">
+            {entry.data.year} • {entry.data.tags}
+        </div>
+        <h1 style="margin-top: 0; font-size: 2.5rem; margin-bottom: 30px;">{entry.data.title}</h1>
+
+        <div class="project-links">
+            {entry.data.github && (
+                <a href={entry.data.github} target="_blank" class="btn-link">
+                    Voir le Code (GitHub) ↗
+                </a>
+            )}
+            {entry.data.paper && (
+                <a href={entry.data.paper} target="_blank" class="btn-link">
+                    Lire le Papier / Étude ↗
+                </a>
+            )}
+        </div>
+    </header>
+
+    <div style="margin-bottom: 60px;">
+        <Image 
+            src={entry.data.cover} 
+            alt={entry.data.title} 
+            class={isPaper ? "paper-cover" : "standard-cover"} 
+        />
+    </div>
+
+    <article class="project-content">
+        <Content />
+    </article>
+
+    <div style="margin-top: 80px;">
+        <a href="/work" style="color: var(--text-ink); text-decoration: none; border-bottom: 1px solid var(--accent-sage);">← Retour à l'Atelier</a>
+    </div>
+
+</BaseLayout>
+
+<style>
+    /* Style des boutons liens (Ta version améliorée) */
+    .project-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    
+    .btn-link {
+        text-decoration: none;
+        padding: 12px 24px;
+        
+        background-color: var(--accent-sage); 
+        color: #fff;
+        border: 1px solid var(--accent-sage);
+        
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 600;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        
+        box-shadow: 0 4px 6px rgba(85, 107, 92, 0.2);
+    }
+    
+    .btn-link:hover {
+        background-color: var(--text-ink);
+        border-color: var(--text-ink);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(46, 58, 63, 0.15);
+    }
+
+    /* --- STYLES DES IMAGES --- */
+
+    /* Style Standard (Projets Main/Side) : Pleine largeur, ombre douce */
+    .standard-cover {
+        width: 100%; 
+        height: auto; 
+        border-radius: 2px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* Style Spécial "Paper" : Le fameux cadre académique */
+    .paper-cover {
+        width: 100%; 
+        height: auto; 
+        border-radius: 2px;
+        
+        /* Cadre Sage Green */
+        border: 1px solid var(--accent-sage); 
+        
+        /* Espace blanc entre l'image et la bordure */
+        padding: 15px; 
+        background-color: #fff; 
+        
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* Style du contenu Markdown */
+    .project-content { font-size: 1.1rem; line-height: 1.8; max-width: 800px; }
+</style>

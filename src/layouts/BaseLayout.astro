@@ -1,0 +1,313 @@
+---
+// src/layouts/BaseLayout.astro
+const {
+  title = "Maxime Attwood | Research Page",
+  active = "", // "about" | "work" | "journal"
+} = Astro.props;
+
+const nav = [
+  { href: "/", label: "About", key: "about" },
+  { href: "/work", label: "Work", key: "work" },
+  { href: "/journal", label: "Tea Journal", key: "journal" },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap");
+
+      :root {
+        --bg-kraft: #eae7de;
+        --bg-paper: #faf9f6;
+        --text-ink: #2e3a3f;
+        --accent-sage: #556b5c;
+        --deco-almond: #ced8c6;
+        --text-muted: rgba(46, 58, 63, 0.72);
+      }
+
+      /* --- GLOBAL CSS --- */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background-color: var(--bg-kraft);
+        color: var(--text-ink);
+        font-family: "Lato", sans-serif;
+        font-weight: 300;
+        margin: 0;
+        line-height: 1.6;
+        overflow-x: hidden; /* Important so background doesn't scroll when modal is open */
+      }
+
+      /* Layout Grid */
+      .layout-container {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        min-height: 100vh;
+      }
+
+      /* Sidebar Styling */
+      .sidebar {
+        padding: 60px 40px;
+        border-right: 1px solid var(--deco-almond);
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: var(--bg-kraft);
+        z-index: 10;
+      }
+
+      .content {
+        padding: 80px 80px;
+        max-width: 1200px;
+      }
+
+      /* Typography */
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 3rem;
+        line-height: 1;
+        margin: 0 0 10px 0;
+        color: var(--text-ink);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+      }
+
+      .role {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--accent-sage);
+        margin-bottom: 44px;
+        font-weight: 700;
+      }
+
+      /* Nav */
+      nav {
+        margin-top: 6px;
+      }
+      .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .nav-list li {
+        margin-bottom: 15px;
+      }
+      
+      /* Shared style for links and CV button */
+      .nav-item {
+        text-decoration: none;
+        color: var(--text-ink);
+        font-size: 1.1rem;
+        font-family: "Playfair Display", serif;
+        transition: 0.25s;
+        border-bottom: 1px solid transparent;
+        padding-bottom: 2px;
+        display: inline-block;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
+      .nav-item:hover {
+        color: var(--accent-sage);
+        transform: translateX(4px);
+      }
+
+      .nav-item[aria-current="page"] {
+        color: var(--accent-sage);
+        border-bottom: 1px solid var(--accent-sage);
+      }
+
+      /* Footer / Meta */
+      .sidebar-footer {
+        font-size: 0.75rem;
+        color: var(--accent-sage);
+        opacity: 0.85;
+      }
+      .sidebar-footer a {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(85, 107, 92, 0.35);
+      }
+      .sidebar-footer a:hover {
+        border-bottom-color: rgba(85, 107, 92, 0.8);
+      }
+      .footer-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .dot {
+        opacity: 0.6;
+      }
+
+      /* --- CV MODAL CSS --- */
+      .cv-modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        
+        /* Just the blur, with very slight tint */
+        background-color: rgba(0, 0, 0, 0.15); 
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+      .cv-modal.open { display: flex; animation: fadeIn 0.3s ease; }
+      
+      .cv-container {
+        /* Dimensions optimized to minimize black borders on PDF */
+        width: 95%; 
+        max-width: 900px; 
+        height: 90vh;
+        
+        background-color: #fff;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        display: flex; flex-direction: column;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      
+      .cv-header {
+        padding: 15px 20px;
+        /* Header color = Sage Green */
+        background-color: var(--accent-sage);
+        color: #fff;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      
+      .close-btn {
+        background: none; border: 1px solid rgba(255,255,255,0.3);
+        color: #fff; padding: 5px 15px; text-transform: uppercase;
+        font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+      }
+      .close-btn:hover { background-color: #fff; color: var(--accent-sage); }
+      
+      .download-link { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.8rem; margin-right: 20px; text-transform: uppercase; letter-spacing: 1px; }
+      .download-link:hover { color: #fff; text-decoration: underline; }
+      
+      .pdf-frame { width: 100%; height: 100%; border: none; background-color: #fff; }
+      
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+      /* Responsive Mobile */
+      @media (max-width: 900px) {
+        .layout-container { grid-template-columns: 1fr; }
+        .sidebar { height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--deco-almond); }
+        .content { padding: 40px 20px; }
+        /* Hide modal on mobile */
+        .cv-modal { display: none !important; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="layout-container">
+      <aside class="sidebar">
+        <div>
+          <h1>Maxime<br />Attwood</h1>
+          <div class="role">PhD Student</div>
+
+          <nav aria-label="Primary">
+            <ul class="nav-list">
+              {
+                nav.map((item) => (
+                  <li>
+                    <a
+                      href={item.href}
+                      class="nav-item"
+                      aria-current={active === item.key ? "page" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+              
+              <li style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--deco-almond);">
+                <button id="open-cv" class="nav-item">Curriculum Vitae</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="sidebar-footer">
+          Inria Grenoble · ComLearn<br />
+          <div class="footer-row">
+            <a href="https://github.com/your-handle" target="_blank" rel="noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/your-handle" target="_blank" rel="noreferrer">LinkedIn</a>
+            <span class="dot">•</span>
+            <a href="mailto:your.email@inria.fr">Email</a>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <slot />
+      </main>
+    </div>
+
+    <div id="cv-modal" class="cv-modal">
+        <div class="cv-container">
+            <div class="cv-header">
+                <span style="font-family: 'Playfair Display', serif; font-style: italic;">Maxime Attwood - CV</span>
+                <div>
+                    <a href="/cv.pdf" download class="download-link">Download PDF</a>
+                    <button id="close-cv" class="close-btn">Close X</button>
+                </div>
+            </div>
+            <object data="/cv.pdf" type="application/pdf" class="pdf-frame">
+                <div style="padding: 40px; text-align: center;">
+                    <p>Your browser cannot display this PDF directly.</p>
+                    <a href="/cv.pdf" class="nav-item" style="border-bottom: 1px solid currentColor;">Download CV</a>
+                </div>
+            </object>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('cv-modal');
+        const openBtn = document.getElementById('open-cv');
+        const closeBtn = document.getElementById('close-cv');
+
+        if(openBtn && modal && closeBtn) {
+            openBtn.addEventListener('click', (e) => {
+                if (window.innerWidth < 900) {
+                    window.open('/cv.pdf', '_blank');
+                } else {
+                    e.preventDefault();
+                    modal.classList.add('open');
+                }
+            });
+
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('open');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('open');
+                }
+            });
+        }
+    </script>
+  </body>
+</html>

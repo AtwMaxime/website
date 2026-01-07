@@ -1,0 +1,211 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import leafRight from '../assets/leaf1.png';
+
+// 1. On récupère tout
+const allWork = await getCollection('work');
+
+// 2. On trie par catégorie
+const papers = allWork.filter(p => p.data.category === 'paper');
+const mainProjects = allWork.filter(p => p.data.category === 'main');
+const sideProjects = allWork.filter(p => p.data.category === 'side');
+
+// Fonction utilitaire pour trier par année (récent en premier)
+const sortByYear = (a, b) => parseInt(b.data.year) - parseInt(a.data.year);
+papers.sort(sortByYear);
+mainProjects.sort(sortByYear);
+sideProjects.sort(sortByYear);
+---
+
+<BaseLayout title="Work">
+    
+    <div class="side-deco">
+        <Image src={leafRight} alt="" class="deco-img" />
+    </div>
+
+    {papers.length > 0 && (
+        <section style="margin-bottom: 80px;">
+            <h2 class="section-title">Publications & Research</h2>
+            <div class="papers-list">
+                {papers.map((entry) => (
+                    <div class="paper-item">
+                        <div class="paper-year">{entry.data.year}</div>
+                        <div class="paper-content">
+                            <a href={`/work/${entry.slug}`} class="paper-link">
+                                <h3 class="paper-title">{entry.data.title}</h3>
+                            </a>
+                            <p class="paper-desc">{entry.data.description}</p>
+                            <div class="paper-meta">
+                                {entry.data.tags} 
+                                {entry.data.paper && <a href={entry.data.paper} target="_blank" class="pdf-tag">PDF ↗</a>}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    )}
+
+    {mainProjects.length > 0 && (
+        <section style="margin-bottom: 80px;">
+            <h2 class="section-title">Selected Works</h2>
+            <div class="projects-grid">
+                {mainProjects.map((project) => (
+                    <a href={`/work/${project.slug}`} class="project-card-link">
+                        <div class="project-card">
+                            <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
+                            <div class="card-content">
+                                <span class="tags">{project.data.tags}</span>
+                                <h3 class="project-title">{project.data.title}</h3>
+                                <p class="card-desc">{project.data.description}</p>
+                            </div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </section>
+    )}
+
+    {sideProjects.length > 0 && (
+        <section>
+            <h2 class="section-title">Side Projects</h2>
+            <div class="projects-grid"> {sideProjects.map((project) => (
+                    <a href={`/work/${project.slug}`} class="project-card-link">
+                        <div class="project-card side-card"> <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
+                            <div class="card-content">
+                                <span class="tags">{project.data.tags}</span>
+                                <h3 class="project-title">{project.data.title}</h3>
+                            </div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </section>
+    )}
+
+</BaseLayout>
+
+<style>
+    /* TITRES DE SECTION */
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-style: italic;
+        border-bottom: 1px solid var(--deco-almond);
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: var(--text-ink);
+    }
+
+    /* --- STYLE SPÉCIFIQUE "PAPERS" (Liste épurée) --- */
+    .papers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .paper-item {
+        display: flex;
+        gap: 20px;
+        align-items: baseline;
+    }
+    .paper-year {
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        color: var(--accent-sage);
+        min-width: 50px;
+    }
+    .paper-content {
+        flex-grow: 1;
+    }
+    .paper-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 400;
+        color: var(--text-ink);
+        transition: color 0.2s;
+    }
+    .paper-link { text-decoration: none; }
+    .paper-link:hover .paper-title { color: var(--accent-sage); text-decoration: underline; }
+    
+    .paper-desc {
+        font-size: 0.95rem;
+        margin: 5px 0;
+        color: var(--text-muted);
+    }
+    .paper-meta {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent-sage);
+        font-weight: 700;
+    }
+    .pdf-tag {
+        margin-left: 10px;
+        color: var(--text-ink);
+        text-decoration: none;
+        border: 1px solid var(--deco-almond);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.6rem;
+    }
+    .pdf-tag:hover { background-color: var(--accent-sage); color: white; border-color: var(--accent-sage); }
+
+
+    /* --- GRILLE PROJETS (Gardée de l'ancien code) --- */
+    .projects-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 40px; 
+        position: relative; 
+        z-index: 1;
+    }
+
+    .project-card-link { text-decoration: none; color: inherit; display: block; }
+
+    .project-card { 
+        background-color: var(--bg-paper); 
+        transition: 0.4s ease; 
+        box-shadow: 0 4px 20px rgba(46, 58, 63, 0.03); 
+        overflow: hidden; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 2px;
+    }
+    .project-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(46, 58, 63, 0.1); }
+
+    .card-image {
+        height: 200px; 
+        background-size: cover; 
+        background-position: center;
+        background-color: #e0e0e0; 
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .card-content { padding: 30px; flex-grow: 1; }
+    .card-desc { font-size: 0.95rem; opacity: 0.9; margin-bottom: 0; }
+
+    .project-title { 
+        font-family: 'Playfair Display', serif; 
+        font-size: 1.4rem; 
+        margin: 10px 0; 
+        color: var(--text-ink); 
+    }
+    
+    .tags { 
+        font-size: 0.65rem; 
+        text-transform: uppercase; 
+        letter-spacing: 1.5px; 
+        color: var(--accent-sage); 
+        font-weight: 700; 
+    }
+
+    /* Déco latérale */
+    .side-deco {
+        position: fixed; top: 0; right: 0; height: 100vh; z-index: -1; pointer-events: none;
+    }
+    .deco-img {
+        height: 100%; width: auto; object-fit: cover; opacity: 0.4;
+    }
+</style>
