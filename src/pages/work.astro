@@ -4,15 +4,12 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import leafRight from '../assets/leaf1.png';
 
-// 1. On récupère tout
 const allWork = await getCollection('work');
 
-// 2. On trie par catégorie
 const papers = allWork.filter(p => p.data.category === 'paper');
 const mainProjects = allWork.filter(p => p.data.category === 'main');
 const sideProjects = allWork.filter(p => p.data.category === 'side');
 
-// Fonction utilitaire pour trier par année (récent en premier)
 const sortByYear = (a, b) => parseInt(b.data.year) - parseInt(a.data.year);
 papers.sort(sortByYear);
 mainProjects.sort(sortByYear);
@@ -25,21 +22,46 @@ sideProjects.sort(sortByYear);
         <Image src={leafRight} alt="" class="deco-img" />
     </div>
 
-    {papers.length > 0 && (
+    <section class="research-focus">
+        <h2 class="section-title">Research Focus</h2>
+        <p class="focus-text">
+            My research lies at the intersection of <strong>Multimodal Learning</strong> and <strong>Social AI</strong>. 
+            I currently focus on endowing <strong>Large Language Models (LLMs)</strong> with social understanding capabilities.
+            <br/><br/>
+            To bridge the gap between human intuition and machine perception, I investigate how mastering elementary skills—such as <strong>gaze estimation</strong>, <strong>emotion recognition</strong>, and <strong>speaker detection</strong>—enables models to better interpret fine-grained social cues in complex interactions.
+        </p>
+    </section>
+
+    {/* --- SELECTED WORKS --- */}
+    {mainProjects.length > 0 && (
         <section style="margin-bottom: 80px;">
-            <h2 class="section-title">Publications & Research</h2>
-            <div class="papers-list">
-                {papers.map((entry) => (
-                    <div class="paper-item">
-                        <div class="paper-year">{entry.data.year}</div>
-                        <div class="paper-content">
-                            <a href={`/work/${entry.slug}`} class="paper-link">
-                                <h3 class="paper-title">{entry.data.title}</h3>
-                            </a>
-                            <p class="paper-desc">{entry.data.description}</p>
-                            <div class="paper-meta">
-                                {entry.data.tags} 
-                                {entry.data.paper && <a href={entry.data.paper} target="_blank" class="pdf-tag">PDF ↗</a>}
+            <h2 class="section-title">Selected Works</h2>
+            <div class="main-projects-layout">
+                {mainProjects.map((project) => (
+                    <div class="project-card">
+                        <a href={`/work/${project.slug}`} class="card-cover-link" aria-label={project.data.title}></a>
+                        <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
+                        
+                        <div class="card-content">
+                            <div class="card-text">
+                                <span class="tags">{project.data.tags}</span>
+                                <h3 class="project-title">{project.data.title}</h3>
+                                <p class="card-desc">{project.data.description}</p>
+                            </div>
+
+                            <div class="card-actions-right">
+                                {project.data.github && (
+                                    <a href={project.data.github} target="_blank" class="action-btn git-btn" aria-label="View Code">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                                        <span>Code</span>
+                                    </a>
+                                )}
+                                {project.data.paper && (
+                                    <a href={project.data.paper} target="_blank" class="action-btn pdf-btn" aria-label="View Paper">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        <span>PDF</span>
+                                    </a>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -48,38 +70,79 @@ sideProjects.sort(sortByYear);
         </section>
     )}
 
-    {mainProjects.length > 0 && (
+    {/* --- PUBLICATIONS --- */}
+    {papers.length > 0 && (
         <section style="margin-bottom: 80px;">
-            <h2 class="section-title">Selected Works</h2>
-            <div class="projects-grid">
-                {mainProjects.map((project) => (
-                    <a href={`/work/${project.slug}`} class="project-card-link">
-                        <div class="project-card">
-                            <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
-                            <div class="card-content">
-                                <span class="tags">{project.data.tags}</span>
-                                <h3 class="project-title">{project.data.title}</h3>
-                                <p class="card-desc">{project.data.description}</p>
+            <h2 class="section-title">Publications & Reports</h2>
+            <div class="papers-list">
+                {papers.map((entry) => (
+                    <details class="paper-group">
+                        <summary class="paper-summary">
+                            <div class="paper-header-left">
+                                <span class="paper-year">{entry.data.year}</span>
+                                <span class="paper-title">{entry.data.title}</span>
+                            </div>
+                            
+                            <div class="paper-actions">
+                                {entry.data.paper && (
+                                    <a href={entry.data.paper} target="_blank" class="action-btn pdf-btn" aria-label="Open PDF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        <span>PDF</span>
+                                    </a>
+                                )}
+                                {entry.data.arxiv && (
+                                    <a href={entry.data.arxiv} target="_blank" class="action-btn arxiv-btn" aria-label="View on Arxiv">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                        <span>Arxiv</span>
+                                    </a>
+                                )}
+                                {entry.data.github && (
+                                    <a href={entry.data.github} target="_blank" class="action-btn git-btn" aria-label="View Code">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                                        <span>Code</span>
+                                    </a>
+                                )}
+                            </div>
+                        </summary>
+
+                        <div class="paper-details-content">
+                            <p>{entry.data.description}</p>
+                            <div class="paper-meta-tags">
+                                {entry.data.tags}
                             </div>
                         </div>
-                    </a>
+                    </details>
                 ))}
             </div>
         </section>
     )}
 
+    {/* --- SIDE PROJECTS --- */}
     {sideProjects.length > 0 && (
         <section>
             <h2 class="section-title">Side Projects</h2>
-            <div class="projects-grid"> {sideProjects.map((project) => (
-                    <a href={`/work/${project.slug}`} class="project-card-link">
-                        <div class="project-card side-card"> <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
-                            <div class="card-content">
+            <div class="projects-grid"> 
+                {sideProjects.map((project) => (
+                    <div class="project-card side-card"> 
+                        <a href={`/work/${project.slug}`} class="card-cover-link" aria-label={project.data.title}></a>
+                        <div class="card-image" style={`background-image: url('${project.data.cover.src}');`}></div>
+                        
+                        <div class="card-content">
+                            <div class="card-text">
                                 <span class="tags">{project.data.tags}</span>
                                 <h3 class="project-title">{project.data.title}</h3>
                             </div>
+
+                             {project.data.github && (
+                                <div class="card-actions-right">
+                                    <a href={project.data.github} target="_blank" class="action-btn git-btn" aria-label="View Code">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                                        <span>Code</span>
+                                    </a>
+                                </div>
+                            )}
                         </div>
-                    </a>
+                    </div>
                 ))}
             </div>
         </section>
@@ -87,125 +150,124 @@ sideProjects.sort(sortByYear);
 
 </BaseLayout>
 
+<script>
+    const buttons = document.querySelectorAll('.action-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+        });
+    });
+</script>
+
 <style>
-    /* TITRES DE SECTION */
     .section-title {
         font-family: 'Playfair Display', serif;
         font-size: 1.8rem;
         font-style: italic;
         border-bottom: 1px solid var(--deco-almond);
-        padding-bottom: 10px;
-        margin-bottom: 30px;
+        padding-bottom: 10px; margin-bottom: 30px;
         color: var(--text-ink);
     }
-
-    /* --- STYLE SPÉCIFIQUE "PAPERS" (Liste épurée) --- */
-    .papers-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-    .paper-item {
-        display: flex;
-        gap: 20px;
-        align-items: baseline;
-    }
-    .paper-year {
-        font-family: 'Playfair Display', serif;
-        font-style: italic;
-        color: var(--accent-sage);
-        min-width: 50px;
-    }
-    .paper-content {
-        flex-grow: 1;
-    }
-    .paper-title {
-        margin: 0;
-        font-size: 1.2rem;
-        font-weight: 400;
-        color: var(--text-ink);
-        transition: color 0.2s;
-    }
-    .paper-link { text-decoration: none; }
-    .paper-link:hover .paper-title { color: var(--accent-sage); text-decoration: underline; }
+    .research-focus { margin-bottom: 60px; }
+    .focus-text { font-size: 1.2rem; line-height: 1.6; color: var(--text-ink); max-width: 800px; }
     
-    .paper-desc {
-        font-size: 0.95rem;
-        margin: 5px 0;
-        color: var(--text-muted);
-    }
-    .paper-meta {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--accent-sage);
-        font-weight: 700;
-    }
-    .pdf-tag {
-        margin-left: 10px;
-        color: var(--text-ink);
-        text-decoration: none;
-        border: 1px solid var(--deco-almond);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.6rem;
-    }
-    .pdf-tag:hover { background-color: var(--accent-sage); color: white; border-color: var(--accent-sage); }
+    :root { --card-border: 1px solid var(--deco-almond); --card-radius: 6px; --card-bg: var(--bg-paper); }
 
+    .papers-list { display: flex; flex-direction: column; gap: 20px; }
+    .paper-group {
+        border: var(--card-border); background-color: var(--card-bg); border-radius: var(--card-radius);
+        padding: 0 20px; transition: all 0.3s ease;
+    }
+    .paper-group:hover { border-color: var(--accent-sage); box-shadow: 0 5px 15px rgba(46, 58, 63, 0.05); }
+    .paper-group[open] { padding-bottom: 20px; border-color: var(--accent-sage); }
+    .paper-summary { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; cursor: pointer; list-style: none; }
+    .paper-summary::-webkit-details-marker { display: none; }
+    .paper-header-left { display: flex; align-items: baseline; gap: 25px; flex: 1; padding-right: 20px; }
+    .paper-year { font-family: 'Playfair Display', serif; font-style: italic; color: var(--accent-sage); min-width: 50px; font-size: 1.1rem; }
+    .paper-title { font-family: 'Lato', sans-serif; font-weight: 400; font-size: 1.15rem; color: var(--text-ink); transition: color 0.2s; }
+    .paper-group:hover .paper-title { color: var(--accent-sage); }
+    .paper-actions { display: flex; gap: 12px; flex-shrink: 0; }
+    .paper-details-content { padding-top: 10px; border-top: 1px dashed rgba(206, 216, 198, 0.6); color: var(--text-muted); font-size: 0.95rem; animation: fadeIn 0.4s ease; }
+    .paper-details-content p { margin: 15px 0; line-height: 1.6; max-width: 850px; }
+    .paper-meta-tags { font-size: 0.75rem; color: var(--accent-sage); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 
-    /* --- GRILLE PROJETS (Gardée de l'ancien code) --- */
-    .projects-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-        gap: 40px; 
-        position: relative; 
-        z-index: 1;
+    .action-btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        font-weight: 700; padding: 8px 16px; border-radius: 4px;
+        transition: all 0.2s ease; position: relative; z-index: 5;
+        background-color: #fff; border: 1px solid var(--deco-almond);
+        color: var(--accent-sage); border-color: var(--deco-almond);
+    }
+    .action-btn:hover { 
+        background-color: var(--accent-sage); color: white; border-color: var(--accent-sage); 
+        transform: translateY(-2px); box-shadow: 0 4px 6px rgba(85, 107, 92, 0.2); 
     }
 
-    .project-card-link { text-decoration: none; color: inherit; display: block; }
+    .arxiv-btn { color: #b31b1b; border-color: #b31b1b; opacity: 0.9; }
+    .arxiv-btn:hover { background-color: #b31b1b; color: white; border-color: #b31b1b; box-shadow: 0 4px 6px rgba(179, 27, 27, 0.2); }
+    
+    .git-btn { color: var(--text-ink); border-color: var(--text-ink); }
+    .git-btn:hover { background-color: var(--text-ink); color: white; border-color: var(--text-ink); }
 
+    .main-projects-layout { display: flex; flex-direction: column; gap: 40px; position: relative; z-index: 1; }
+    
     .project-card { 
-        background-color: var(--bg-paper); 
-        transition: 0.4s ease; 
-        box-shadow: 0 4px 20px rgba(46, 58, 63, 0.03); 
-        overflow: hidden; 
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        border-radius: 2px;
+        background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
+        transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(46, 58, 63, 0.03); 
+        overflow: hidden; height: 100%; display: flex; flex-direction: column; position: relative;
     }
-    .project-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(46, 58, 63, 0.1); }
-
-    .card-image {
-        height: 200px; 
-        background-size: cover; 
-        background-position: center;
-        background-color: #e0e0e0; 
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+    .project-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(46, 58, 63, 0.1); border-color: var(--accent-sage); }
+    
+    .card-cover-link { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: pointer; }
+    .card-image { height: 250px; background-size: cover; background-position: center; background-color: #e0e0e0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    
+    .card-content { 
+        /* Padding droit augmenté pour décoller du bord */
+        padding: 30px 50px 30px 30px; 
+        flex-grow: 1; 
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;
     }
-    .card-content { padding: 30px; flex-grow: 1; }
-    .card-desc { font-size: 0.95rem; opacity: 0.9; margin-bottom: 0; }
 
-    .project-title { 
-        font-family: 'Playfair Display', serif; 
-        font-size: 1.4rem; 
-        margin: 10px 0; 
-        color: var(--text-ink); 
+    .side-card .card-content {
+        justify-content: flex-start; 
+        align-items: center; 
+        /* Padding droit augmenté également */
+        padding: 20px 50px 20px 30px; 
     }
     
-    .tags { 
-        font-size: 0.65rem; 
-        text-transform: uppercase; 
-        letter-spacing: 1.5px; 
-        color: var(--accent-sage); 
-        font-weight: 700; 
-    }
+    .card-text { flex: 1; }
 
-    /* Déco latérale */
-    .side-deco {
-        position: fixed; top: 0; right: 0; height: 100vh; z-index: -1; pointer-events: none;
+    .card-actions-right {
+        display: flex; flex-direction: column; gap: 10px;
+        position: relative; z-index: 5;
+        min-width: 90px;
     }
-    .deco-img {
-        height: 100%; width: auto; object-fit: cover; opacity: 0.4;
+    .card-actions-right .action-btn { padding: 6px 12px; font-size: 0.7rem; width: 100%; }
+
+    .card-desc { font-size: 0.95rem; opacity: 0.9; margin-bottom: 0; margin-top: 10px; color: var(--text-muted); }
+    .project-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin: 10px 0 5px 0; color: var(--text-ink); }
+    .side-card .project-title { font-size: 1.25rem; margin-bottom: 0; }
+
+    .tags { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-sage); font-weight: 700; }
+    
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; position: relative; z-index: 1; }
+
+    .side-deco { position: fixed; top: 0; right: 0; height: 100vh; z-index: -1; pointer-events: none; }
+    .deco-img { height: 100%; width: auto; object-fit: cover; opacity: 0.4; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+        .paper-summary { flex-direction: column; align-items: flex-start; gap: 15px; }
+        .paper-header-left { padding-right: 0; width: 100%; justify-content: flex-start; gap: 10px; flex-wrap: wrap;}
+        .paper-actions { width: 100%; margin-top: 5px; }
+        .paper-year { width: 100%; display: block; margin-bottom: 5px; }
+
+        .card-content { flex-direction: column; align-items: flex-start; }
+        .side-card .card-content { align-items: flex-start; }
+        
+        .card-actions-right { flex-direction: row; margin-top: 15px; width: 100%; }
+        .card-actions-right .action-btn { flex: 1; }
     }
 </style>

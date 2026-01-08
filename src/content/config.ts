@@ -10,6 +10,7 @@ const workCollection = defineCollection({
         cover: image(),
         github: z.string().optional(), 
         paper: z.string().optional(),
+	arxiv: z.string().optional(),
         
         // NOUVEAU CHAMP : On force une de ces 3 valeurs
         category: z.enum(['paper', 'main', 'side']), 

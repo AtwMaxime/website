@@ -1,45 +1,53 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/083cffc9-2078-4483-8536-a0e38064f211/deploy-status)](https://app.netlify.com/projects/attwoodmaxime/deploys)
+
 # Maxime Attwood — Research Portfolio
 
 This repository contains the source code for my personal academic website and research portfolio.
 It is built with **Astro**, focusing on performance, minimalism, and a "paper-like" reading experience.
 
+The website highlights my research in **Multimodal Learning** and **Social AI**, alongside my personal projects.
+
 ## 🧪 About the Project
 
-This portfolio is designed to bridge the gap between a classic academic profile and a creative developer portfolio.
+This portfolio bridges the gap between a classic academic profile and a modern developer portfolio.
 
 **Key Features:**
-* **Minimalist Aesthetic:** "Sage Green" & "Paper" theme using CSS variables.
-* **Content Collections:** Structured data for research papers, main projects, and side experiments.
-* **Visual Flair:** Subtle parallax effects (floating leaves) and academic framing for papers.
-* **Performance:** Static Site Generation (SSG) via Astro for lightning-fast loading.
+* **Academic & Clean:** "Sage Green" & "Kraft Paper" theme using scoped CSS variables.
+* **Smart Content Management:** Structured data via Astro Content Collections (`work` & `journal`).
+* **Dynamic Layouts:**
+    * **Selected Works:** Full-width cards with visual focus.
+    * **Publications:** Accordion-style list with quick access to PDF, Arxiv, and Code.
+    * **Side Projects:** Responsive grid layout.
+* **Performance:** Static Site Generation (SSG) for lightning-fast loading.
 
 ## 🛠 Tech Stack
 
 * **Framework:** [Astro](https://astro.build/) (v5)
-* **Styling:** Scoped CSS & CSS Variables (No heavy frameworks)
-* **Content:** Markdown (`.md`) with Type-Safe Schemas
-* **Deployment:** [Netlify / Vercel / GitHub Pages]
+* **Language:** TypeScript
+* **Styling:** Plain CSS & CSS Variables (Zero-runtime overhead)
+* **Content:** Markdown (`.md`) with Zod Schema Validation
+* **Deployment:** Netlify
 
 ## 📂 Project Structure
 
 ```text
 /
-├── public/             # Static assets (PDFs, favicons)
+├── public/             # Static assets (PDFs, favicons, CV)
 ├── src/
 │   ├── assets/         # Images (optimized by Astro)
-│   ├── content/        # Markdown content (database)
-│   │   ├── work/       # Projects & Papers
-│   │   └── journal/    # Notes & Thoughts
-│   ├── layouts/        # Base layouts (Header, Sidebar, SEO)
-│   ├── pages/          # Routes (index, work, etc.)
-│   └── styles/         # Global styles (fonts, resets)
+│   ├── content/        # Content Collections (Database)
+│   │   ├── work/       # Research Papers & Projects (.md)
+│   │   └── journal/    # Tea Journal (.md)
+│   ├── layouts/        # Base layouts (Header, SEO, Footer)
+│   ├── pages/          # Routes (index, work, journal)
+│   └── styles/         # Global styles
 └── astro.config.mjs    # Configuration
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* Node.js (v18 or higher)
+* Node.js (v18+)
 * npm
 
 ### Installation
@@ -58,51 +66,47 @@ This portfolio is designed to bridge the gap between a classic academic profile 
 3.  **Start the development server:**
     ```bash
     npm run dev
-    # Or to expose to local network (mobile testing):
-    npm run dev -- --host
     ```
 
 ## 📝 Managing Content
 
 ### Adding a Project or Paper
-Create a new `.md` file in `src/content/work/`.
+Create a new `.md` file in `src/content/work/`. The layout is determined by the `category` field.
 
 **Frontmatter structure:**
 
 ```yaml
 ---
-title: "Project Title"
-description: "Short summary for the card."
-tags: "Python • RL • Vision"
+title: "Wavelet Flow Matching"
+description: "Short abstract displayed on the card."
+tags: "Generative AI • Math"
 year: "2025"
-category: "paper"  # Options: 'paper', 'main', 'side'
-cover: "../../assets/image.jpg"
+category: "paper"  # Options: 'main', 'paper', 'side'
+cover: "../../assets/graph.png"
+
+# Optional Links (Buttons appear automatically if defined)
 github: "[https://github.com/](https://github.com/)..."
-paper: "https://link-to-pdf..."
+paper: "/pdfs/my-paper.pdf"      # Local file in public/
+arxiv: "[https://arxiv.org/abs/](https://arxiv.org/abs/)..." # Adds the specific Red Arxiv button
 ---
 ```
 
-* **category: 'paper'** → Adds a specific academic border style to the image.
-* **category: 'main'** → Standard full-width display.
-* **category: 'side'** → For smaller experiments.
+### Layout Behavior by Category
+* **`main`**: Full-width card with large visual. Used for major research projects.
+* **`paper`**: Accordion/Expandable list. Optimized for bibliography.
+* **`side`**: Compact grid card. Used for experiments or smaller tools.
 
-### Updating "Recent Activity"
-Edit the `activities` array directly in `src/pages/index.astro`:
-
-```javascript
-const activities = [
-    { date: "Jan 2026", event: "Paper submitted..." },
-    // Add new items here
-];
-```
+### Editing the Intro
+The "Research Focus" text (introductory section) is directly editable in `src/pages/work.astro`.
 
 ## 🎨 Customization
 
-Key colors are defined in `src/layouts/BaseLayout.astro` (or global CSS):
+Key design tokens are defined in `src/layouts/BaseLayout.astro`:
 
 * `--bg-paper`: Background color (Cream/Beige).
 * `--text-ink`: Main text color (Dark Grey).
-* `--accent-sage`: Primary accent color (Sage Green).
+* `--accent-sage`: Primary accent color (Green).
+* `--deco-almond`: Border and decorative elements.
 
 ## 📄 License
 
